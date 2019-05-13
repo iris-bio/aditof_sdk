@@ -1,0 +1,4 @@
+<map id="aditof::FrameDetails" name="aditof::FrameDetails">
+<area shape="rect" id="node1" title="Describes the properties of a frame." alt="" coords="9,95,159,121"/>
+<area shape="rect" id="node2" href="$structaditof_1_1_frame_cal_data.html" title="Stores the calibration data to be applied to the frame." alt="" coords="5,5,163,32"/>
+</map>

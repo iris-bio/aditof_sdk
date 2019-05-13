@@ -1,0 +1,5 @@
+<map id="aditof::CameraDetails" name="aditof::CameraDetails">
+<area shape="rect" id="node1" title="Describes the properties of a camera." alt="" coords="5,184,167,211"/>
+<area shape="rect" id="node2" href="$structaditof_1_1_frame_details.html" title="Describes the properties of a frame." alt="" coords="11,95,161,121"/>
+<area shape="rect" id="node3" href="$structaditof_1_1_frame_cal_data.html" title="Stores the calibration data to be applied to the frame." alt="" coords="7,5,165,32"/>
+</map>
