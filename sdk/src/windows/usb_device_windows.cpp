@@ -51,12 +51,6 @@ static aditof::Status getDevice(IBaseFilter **pVideoInputFilter,
     using namespace aditof;
     Status status = Status::OK;
 
-    AtomicLock lock(&m_lock);
-
-    if (!lock.ownsLock()) {
-        return Status::BUSY;
-    }
-
     HRESULT hr;
     BOOL done = FALSE;
     ICreateDevEnum *DevEnum = nullptr;
