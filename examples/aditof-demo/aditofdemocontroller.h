@@ -62,6 +62,8 @@ class AdiTofDemoController {
     bool m_frameRequested;
 
     std::unique_ptr<AditofDemoRecorder> m_recorder;
+
+    bool m_running;
 };
 
 #endif

@@ -5,7 +5,7 @@
 
 AdiTofDemoController::AdiTofDemoController()
     : m_cameraInUse(-1), m_frameRequested(false),
-      m_recorder(new AditofDemoRecorder()) {
+      m_recorder(new AditofDemoRecorder()), m_running(false) {
 
     m_system.initialize();
     m_system.getCameraList(m_cameras);
@@ -49,15 +49,26 @@ void AdiTofDemoController::startCapture() {
         return;
     }
 
+    if (m_running) {
+        return;
+    }
+
     m_stopFlag = false;
     m_workerThread =
         std::thread(std::bind(&AdiTofDemoController::captureFrames, this));
+
+    m_running = true;
 }
 
 void AdiTofDemoController::stopCapture() {
     if (m_cameraInUse == -1) {
         return;
     }
+
+    if (!m_running) {
+        return;
+    }
+
     std::unique_lock<std::mutex> lock(m_requestMutex);
     m_stopFlag = true;
     lock.unlock();
@@ -65,6 +76,7 @@ void AdiTofDemoController::stopCapture() {
     if (m_workerThread.joinable()) {
         m_workerThread.join();
     }
+    m_running = false;
 }
 
 std::string AdiTofDemoController::getMode() const {
@@ -77,7 +89,18 @@ void AdiTofDemoController::setMode(const std::string &mode) {
         return;
     }
     auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+
+    bool running = m_running;
+
+    if (running) {
+        stopCapture();
+    }
+
     camera->setMode(mode);
+
+    if (running) {
+        startCapture();
+    }
 }
 
 std::pair<float, float> AdiTofDemoController::getTemperature() {
