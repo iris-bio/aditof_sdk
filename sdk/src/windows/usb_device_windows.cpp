@@ -51,6 +51,12 @@ static aditof::Status getDevice(IBaseFilter **pVideoInputFilter,
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     HRESULT hr;
     BOOL done = FALSE;
     ICreateDevEnum *DevEnum = nullptr;
@@ -290,6 +296,12 @@ aditof::Status UsbDevice::open() {
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     HRESULT hr;
     GUID CAPTURE_MODE = PIN_CATEGORY_CAPTURE;
 
@@ -467,6 +479,12 @@ aditof::Status UsbDevice::stop() {
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     HRESULT hr = m_implData->pControl->Stop();
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not stop graph";
@@ -507,6 +525,12 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     HRESULT hr = m_implData->streamConf->GetFormat(&(m_implData->pAmMediaType));
     if (FAILED(hr)) {
         LOG(WARNING) << "failed 7";
@@ -530,6 +554,12 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
 aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     HRESULT hr;
     DWORD uiNumNodes;
@@ -651,6 +681,12 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
 aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     int retryCount = 0;
     HRESULT hr;
@@ -852,6 +888,12 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     HRESULT hr;
     DWORD uiNumNodes;
     IKsControl *pKsUnk = nullptr;
@@ -1038,6 +1080,12 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
                                             size_t length) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     HRESULT hr;
     DWORD uiNumNodes;
