@@ -36,3 +36,16 @@ void aditof::Utils::calibrateFrame(uint16_t *calibrationData, uint16_t *frame,
         *framePtr = *(cache + *framePtr);
     }
 }
+
+aditof::AtomicLock::AtomicLock(std::atomic_flag *lock) noexcept
+    : m_lock(lock), m_ownsLock(false) {
+    m_ownsLock = !m_lock->test_and_set(std::memory_order_acquire);
+}
+
+aditof::AtomicLock::~AtomicLock() noexcept {
+    if (ownsLock()) {
+        m_lock->clear(std::memory_order_release);
+    }
+}
+
+bool aditof::AtomicLock::ownsLock() const { return m_ownsLock; }
