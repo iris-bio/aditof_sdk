@@ -4,6 +4,7 @@
 #include "device_construction_data.h"
 #include <aditof/device_interface.h>
 
+#include <atomic>
 #include <memory>
 
 class UsbDevice : public DeviceInterface {
@@ -41,6 +42,7 @@ class UsbDevice : public DeviceInterface {
 
     aditof::DeviceConstructionData m_devData;
     std::unique_ptr<ImplData> m_implData;
+    std::atomic_flag m_lock;
 };
 
 #endif // USB_DEVICE_H

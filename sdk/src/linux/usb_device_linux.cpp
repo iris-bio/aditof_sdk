@@ -38,7 +38,8 @@ struct UsbDevice::ImplData {
 };
 
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new UsbDevice::ImplData) {
+    : m_devData(data), m_implData(new UsbDevice::ImplData),
+      m_lock(ATOMIC_FLAG_INIT) {
     m_implData->fd = 0;
     m_implData->started = false;
     m_implData->buffers = nullptr;
@@ -78,6 +79,12 @@ aditof::Status UsbDevice::open() {
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     m_implData->fd =
         ::open(m_devData.driverPath.c_str(), O_RDWR | O_NONBLOCK, 0);
     if (-1 == m_implData->fd) {
@@ -107,6 +114,12 @@ aditof::Status UsbDevice::start() {
 
 aditof::Status UsbDevice::stop() {
     using namespace aditof;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     if (!m_implData->started) {
         LOG(INFO) << "Device already stopped";
@@ -157,6 +170,12 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
 
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     // Buggy driver paranoia.
     unsigned int min;
@@ -265,6 +284,12 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
 aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     if (!firmware) {
         LOG(WARNING) << "No firmware provided";
         return Status::INVALID_ARGUMENT;
@@ -331,6 +356,12 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
 aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     if (!buffer) {
         LOG(WARNING) << "Invalid adddress to buffer provided";
@@ -529,6 +560,12 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
                                       size_t length) {
     using namespace aditof;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     struct uvc_xu_control_query cq;
     uint8_t packet[MAX_BUF_SIZE];
     size_t writeLen = 0;
@@ -609,6 +646,12 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
                                             size_t length) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     struct uvc_xu_control_query cq;
     unsigned char buf[MAX_BUF_SIZE];
