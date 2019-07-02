@@ -4,6 +4,7 @@
 #include "device_construction_data.h"
 #include <aditof/device_interface.h>
 
+#include <atomic>
 #include <memory>
 
 class LocalDevice : public DeviceInterface {
@@ -40,6 +41,8 @@ class LocalDevice : public DeviceInterface {
     struct ImplData;
     aditof::DeviceConstructionData m_devData;
     std::unique_ptr<ImplData> m_implData;
+
+    std::atomic_flag m_lock;
 };
 
 #endif // LOCAL_DEVICE_H

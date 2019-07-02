@@ -71,7 +71,8 @@ static int xioctl(int fh, unsigned int request, void *arg) {
 }
 
 LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new LocalDevice::ImplData) {
+    : m_devData(data), m_implData(new LocalDevice::ImplData),
+      m_lock(ATOMIC_FLAG_INIT) {
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
 }
@@ -110,6 +111,12 @@ LocalDevice::~LocalDevice() {
 aditof::Status LocalDevice::open() {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     struct stat st;
     struct v4l2_capability cap;
@@ -190,6 +197,12 @@ aditof::Status LocalDevice::start() {
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     if (m_implData->started) {
         LOG(INFO) << "Device already started";
         return Status::BUSY;
@@ -228,6 +241,12 @@ aditof::Status LocalDevice::start() {
 aditof::Status LocalDevice::stop() {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     if (!m_implData->started) {
         LOG(INFO) << "Device already stopped";
@@ -275,6 +294,12 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     struct v4l2_requestbuffers req;
     struct v4l2_format fmt;
@@ -366,6 +391,12 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     static struct v4l2_ext_control extCtrl;
     static struct v4l2_ext_controls extCtrls;
     static unsigned char buf[CTRL_PACKET_SIZE];
@@ -435,6 +466,12 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
 aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     fd_set fds;
     struct timeval tv;
@@ -598,6 +635,12 @@ aditof::Status LocalDevice::writeEeprom(uint32_t address, const uint8_t *data,
     using namespace aditof;
     Status status = Status::OK;
 
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
+
     eeprom edev;
 
     if (eeprom_open(EEPROM_DEV_PATH, &edev) < 0) {
@@ -650,6 +693,12 @@ aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
                                               size_t length) {
     using namespace aditof;
     Status status = Status::OK;
+
+    AtomicLock lock(&m_lock);
+
+    if (!lock.ownsLock()) {
+        return Status::BUSY;
+    }
 
     static struct v4l2_ext_control extCtrl;
     static struct v4l2_ext_controls extCtrls;
