@@ -71,7 +71,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 set_target_properties( ${PROJECT_NAME} PROPERTIES
                        VERSION ${VERSION}
                        SOVERSION 1.0
-                       CXX_STANDARD 11
 )
 
 target_link_libraries( ${PROJECT_NAME}
