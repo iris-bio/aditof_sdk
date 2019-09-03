@@ -74,13 +74,12 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
                        CXX_STANDARD 11
 )
 
-target_link_libraries( ${PROJECT_NAME} PUBLIC
-                       glog::glog
-)
-
-target_link_libraries( ${PROJECT_NAME} PRIVATE
-                       ${Protobuf_LIBRARIES}
-                       ${LIBWEBSOCKETS_LIBRARIES}
+target_link_libraries( ${PROJECT_NAME}
+    PUBLIC
+        glog::glog
+    PRIVATE
+        ${Protobuf_LIBRARIES}
+        ${LIBWEBSOCKETS_LIBRARIES}
 )
 
 if ( RASPBERRYPI )
