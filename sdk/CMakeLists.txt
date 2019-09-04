@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 project(aditof)
 
 add_definitions(-DSDK_EXPORTS)
-find_package(glog 0.3.5 REQUIRED)
-find_package(Protobuf 3.9.0 REQUIRED)
+find_package(glog 0.3 REQUIRED)
+find_package(Protobuf 3 REQUIRED)
 find_package(Libwebsockets REQUIRED)
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
