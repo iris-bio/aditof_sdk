@@ -10,11 +10,11 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
 get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
 
 file(GLOB SOURCES
-    ${CMAKE_SOURCE_DIR}/sdk/src/*.cpp
+    src/*.cpp
 )
 
 file(GLOB HEADERS
-    ${CMAKE_SOURCE_DIR}/sdk/include/aditof/*.h
+    include/aditof/*.h
 )
 
 set(TARGET_STRING "target")
