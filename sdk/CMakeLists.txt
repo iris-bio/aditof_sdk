@@ -13,9 +13,8 @@ file(GLOB SOURCES
     src/*.cpp
 )
 
-file(GLOB HEADERS
-    include/aditof/*.h
-)
+file(GLOB_RECURSE HEADERS  include/*.h)
+list(APPEND HEADERS include/aditof/version.h)
 
 set(TARGET_STRING "target")
 
@@ -82,6 +81,12 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE
                        ${Protobuf_LIBRARIES}
                        ${LIBWEBSOCKETS_LIBRARIES}
 )
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
+INSTALL(TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include/${PROJECT_NAME}
+        )
 
 if ( RASPBERRYPI )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon -latomic")
