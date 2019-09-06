@@ -50,6 +50,7 @@ if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
 endif()
 
+# Create target and set properties
 add_library(${PROJECT_NAME} SHARED
     ${SOURCES}
     ${PLATFORM_SOURCES}
@@ -58,19 +59,25 @@ add_library(${PROJECT_NAME} SHARED
     ${PROTO_HDRS}
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include/)
-target_include_directories(${PROJECT_NAME} PRIVATE
-    src/
-    src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
-    ${Protobuf_INCLUDE_DIRS}
-    ${GENERATED_PROTO_FILES_DIR}
-    ${LIBWEBSOCKETS_INCLUDE_DIRS}
-    ${OPENSSL_INCLUDE_DIRS}
+add_library(aditof::aditof ALIAS aditof)
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        src/
+        src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
+        ${Protobuf_INCLUDE_DIRS}
+        ${GENERATED_PROTO_FILES_DIR}
+        ${LIBWEBSOCKETS_INCLUDE_DIRS}
+        ${OPENSSL_INCLUDE_DIRS}
 )
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES
                        VERSION ${VERSION}
                        SOVERSION 1.0
+                       CXX_STANDARD 11
 )
 
 target_link_libraries( ${PROJECT_NAME}
@@ -92,3 +99,49 @@ if( APPLE )
     endif( NOT LIBUVC_LIB)
     target_link_libraries( ${PROJECT_NAME} PRIVATE ${LIBUVC_LIB})
 endif( APPLE )
+
+# Install #########################
+
+include(GNUInstallDirs)
+set(INSTALL_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/aditof)
+
+install(TARGETS aditof
+    EXPORT aditof-targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(EXPORT aditof-targets
+    FILE
+        aditof-targets.cmake
+    NAMESPACE
+        aditof::
+    DESTINATION
+        ${INSTALL_CONFIG_DIR}
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/aditof-config-version.cmake
+    VERSION ${VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+set(CONFIG_INCLUDE_DIRS "${CMAKE_PREFIX_PATH}/${CMAKE_INSTALL_INCLUDEDIR}")
+
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/aditof-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/aditof-config.cmake
+    INSTALL_DESTINATION ${INSTALL_CONFIG_DIR}
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/aditof-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/aditof-config-version.cmake
+    DESTINATION ${INSTALL_CONFIG_DIR}
+)
+
+#################################################
+
+# TODO: INSTALL python bindings/ doc
